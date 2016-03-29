@@ -1,0 +1,29 @@
+splitrows col: column1 on: '|-'
+split col: column1 on: `\n` limit: 7
+drop col: column2
+header
+drop col: column8
+drop col: column9
+extract col: column3 after: `{delim}` before: `\}`
+drop col: column3
+extractlist col: column4 on: `\|{digit}{4}` as: 'column2'
+replace col: column2 on: `\|` with: '' global: true
+extractlist col: column5 on: `\|{digit}{4}` as: 'column3'
+replace col: column3 on: `\|` with: '' global: true
+extractlist col: column6 on: `\|{digit}{4}` as: 'column8'
+replace col: column8 on: `\|` with: '' global: true
+extractlist col: column7 on: `\|{digit}{4}` as: 'column9'
+replace col: column9 on: `\|` with: '' global: true
+drop col: column4,column5,column6,column7
+unpivot col: column2,column3,column8,column9
+replace col: key on: `column2` with: '1' global: true
+replace col: key on: `column3` with: '2' global: true
+replace col: key on: `column8` with: '3' global: true
+replace col: key on: `column9` with: '4' global: true
+move col: key after: value
+unnest col: value
+drop col: value
+rename col: column1 to: 'country'
+rename col: unnest_value to: 'year'
+rename col: key to: 'position'
+keep row: matches([year], `{start}{digit}{4}{end}`)

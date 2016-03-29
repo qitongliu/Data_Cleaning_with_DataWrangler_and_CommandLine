@@ -1,0 +1,62 @@
+splitrows col: column1 on: '\n' quote: '\"'
+keep row: matches([column1], `\| \'\'`)
+split col: column1 on: '||' limit: 4
+extract col: column2 after: `[` before: `]`
+split col: column1 after: `\)` before: `{end}`
+drop col: column8
+drop col: column2
+replace col: column3 on: `[[` with: '' global: true
+replace col: column3 on: `]] ` with: '' global: true
+split col: column3 on: `\|`
+split col: column2 on: `/ `
+drop col: column3
+merge col: column1,column8 with: '\/ ' as: 'column2'
+replace col: column2 on: `{delim-ws}{end}` with: ''
+drop col: column1,column8
+split col: column4 on: `;`
+drop col: column3
+extract col: column1 after: `{start} ` before: `\(`
+replace col: column3 on: `[[` with: '' global: true
+replace col: column3 on: `]]` with: '' global: true
+drop col: column1
+replace col: column5 on: `[[` with: '' global: true
+replace col: column5 on: `]]` with: '' global: true
+split col: column5 on: `,`
+split col: column4 on: `,`
+split col: column8 on: `,`
+replace col: column1 on: `{delim}{end}` with: ''
+extract col: column1 after: `\|` before: `{end}`
+replace col: column1 on: `{start} %+\|%+{end}` with: ''
+merge col: column1,column8 with: ' ' as: 'column10'
+drop col: column1,column8
+extract col: column5 after: `\|` before: `{end}`
+replace col: column5 on: `{start} %+\|%+{end}` with: ''
+merge col: column5,column1 as: 'column8'
+drop col: column5,column1
+extract col: column4 after: `\|` before: `{end}`
+replace col: column4 on: `{start} %+\|%+{end}` with: ''
+merge col: column4,column1 as: 'column5'
+drop col: column4,column1
+extract col: column9 after: `\|` before: `{end}`
+replace col: column9 on: `{start} %+\|%+{end}` with: ''
+merge col: column9,column1 as: 'column4'
+drop col: column9,column1
+merge col: column10,column8,column5,column4 with: ',' as: 'column1'
+drop col: column10,column8,column5,column4
+replace col: column1 on: `,,,` with: '' global: true
+replace col: column1 on: ` ,,` with: '' global: true
+replace col: column1 on: `{delim-ws}{end}` with: ''
+extract col: column6 after: `publisher=` before: `{delim-ws}`
+drop col: column6
+replace col: column2 on: `{start}{delim}` with: ''
+replace col: column1 on: `{start}{delim}` with: ''
+rename col: column7 to: 'Movie'
+rename col: column3 to: 'Director'
+rename col: column1 to: 'Genre'
+rename col: column4 to: 'Publisher'
+rename col: column2 to: 'Production'
+extractlist col: Production on: `{any}+` delimiter: `/` as: 'extractlist_Production'
+replace col: extractlist_Production on: ` "` with: '\"' global: true
+replace col: extractlist_Production on: `" ` with: '\"' global: true
+drop col: Production
+rename col: extractlist_Production to: 'Production'
