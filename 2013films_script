@@ -1,0 +1,73 @@
+cat 2013films.txt | grep "^| ''" | 
+sed "s/\[\[//g; s/\]\]//g; s/^\| //g; s/''//g" |
+awk -F'\\|\\|' 'BEGIN{printf "Movie, Production, Director, Genre, Publisher\n"} {
+	## Movie
+	split($1, movie, "|");
+	sub(/ $/, "", movie[1]);    # make white space consistent in all movies
+	gsub(/,/, " ", movie[1]);   # remove comma in movie names
+	combined = movie[1];
+
+	## Production
+	n = split($2, prods, "/");
+	for(i=1; i<=n; i++) {
+		split(prods[i], prod, "|");
+		if(i==1) {
+			sub(/ $/, "", prod[1]);
+			production = prod[1];
+			}
+		else {
+			sub(/ $/, "", prod[1]);
+			production = production"/"prod[1];
+		}
+	}
+	gsub(/,/, " ", production);    # remove comma in production names
+	combined = combined","production;
+
+	## Director
+	split($3, dirs, ";");
+	split(dirs[1], dir, " [(]");
+	gsub(/,/, "/", dir[1]);        # use / to separate directors
+	combined = combined","dir[1];
+
+	## Genre
+	n = split($4, gs, ", ");
+	for(i=1; i<=n; i++) {
+		m = split(gs[i], g, "|");
+		if(i==1) {
+			if(m == 1) {
+				genre = g[1];
+			}
+			else {
+				genre = g[2];
+			}
+			}
+		else {
+			if(m == 1) {
+				genre = genre"/ "g[1];
+			}
+			else {
+				genre = genre"/ "g[2];
+			}
+		}
+	}
+	if(!match(genre, /^ /)) {
+		genre = " "genre
+	}
+	if(match(genre, / $/)) {
+		sub(/ $/, "", genre)
+	}
+	combined = combined","genre;
+
+	## Publisher	
+	n = split($5, ps, "|")
+	for(i=1; i<=n; i++) {
+		if(match(ps[i], /publisher=/)) {
+			sub(/publisher=/, "", ps[i]);
+			sub(/}.+/, "", ps[i]);
+			combined = combined","ps[i];
+			break;
+		}
+	}
+	print combined;
+	}
+	'

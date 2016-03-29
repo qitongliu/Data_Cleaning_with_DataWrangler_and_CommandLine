@@ -1,0 +1,23 @@
+cat worldcup.txt | sed 's/^\|//; s/bgcolor=#FFF68F\|//' | 
+grep -v '^[-0-9]\s*$' | grep -v '^[!:]' | grep -v '^1[0-9]$' |
+awk -F',' 'BEGIN {printf "country, year, position\n"}
+	/\{\{fb/ {split($0, country_raw, "fb");
+		gsub(/\|/, "", country_raw[2]);
+		gsub(/\}+.*/, "", country_raw[2])
+		country = country_raw[2];
+		pos=0;
+	}
+	!/\{\{fb/ {pos = pos + 1;
+		if(match($0, /^[0-9]/)) {
+			n = split($0, years_raw, ",")
+			for(i=1; i<=n; i++) {
+				split(years_raw[i], year_raw, "|")
+				split(year_raw[2], year, "]")
+				sub(/\*/, "", year[1]);
+				combined = country", "year[1]", "pos;
+				print combined;
+				printf("\n");
+			}
+		}
+	}'
+
